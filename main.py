@@ -23,7 +23,9 @@ service = Service(executable_path=chromedriver_path)
 driver = webdriver.Chrome(service=service)
 
 #default page - enter email and password in .env
-driver.get("https://passportyork.yorku.ca/ppylogin/ppylogin")
+driver.get("https://wrem.sis.yorku.ca/Apps/WebObjects/REM.woa/wa/DirectAction/rem")
+
+
 
 #duo-page
 #enter duo number
