@@ -185,6 +185,7 @@ def transfer_section(course_code):
 login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
 vsb_add_course(course_code)
 
+#error might be because it's cacheing the old token in the broswer and tries to interact with the elements like it's trying to login for the first time
 if (check_availability_with_refresh()):
     login_and_bypass_verification(driver,rem,myusername,mypassword,mybypasscode)
     transfer_section(course_code)
