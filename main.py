@@ -115,44 +115,48 @@ def login_and_bypass_verification(driver, website_url, myusername, mypassword, m
         print(f"An error occurred during the login and verification process: {e}")
 
 
+def add_course(course_code):
+
+    time.sleep(5)
+
+    term_radio_button = driver.find_element(By.ID, "term_2024102119")
+    term_radio_button.click()
+
+    time.sleep(2)
+
+    course_input = driver.find_element(By.ID, "code_number")
+    course_input.clear()  
+    course_input.send_keys(course_code)
+
+    wait = WebDriverWait(driver, 10)  
+    add_course_button = wait.until(
+        EC.element_to_be_clickable((By.ID, "addCourseButton"))
+    )   
+
+    add_course_button.click()
+    print("Successfully clicked the 'Add Course' button.")
+
+    time.sleep(3)
+
+def check_availability():
+
+    try:
+        warning_message_element = driver.find_element(By.XPATH, '//*[@id="requirements"]/div[3]/div[2]/div[5]/div/span')
+        warning_text = warning_message_element.text.strip()
+        if "All classes are full" in warning_text:
+            print("The course is full.")
+        elif not warning_text:
+            print("Course is Available")
+        else:
+            print(f"Unexpected status: {warning_text}")
+    except Exception as e:
+        print("The course is available (warningMessage element not found).")
+        print(f"Error: {e}")
+
 
 login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
-
-time.sleep(10)
-
-term_radio_button = driver.find_element(By.ID, "term_2024102119")
-term_radio_button.click()
-
-time.sleep(2)
-
-course_input = driver.find_element(By.ID, "code_number")
-course_input.clear()  
-course_input.send_keys(course_code)
-
-wait = WebDriverWait(driver, 10)  
-add_course_button = wait.until(
-    EC.element_to_be_clickable((By.ID, "addCourseButton"))
-)
-
-add_course_button.click()
-print("Successfully clicked the 'Add Course' button.")
-
-time.sleep(3)
-
-try:
-    warning_message_element = driver.find_element(By.XPATH, '//*[@id="requirements"]/div[3]/div[2]/div[5]/div/span')
-    warning_text = warning_message_element.text.strip()
-    if "All classes are full" in warning_text:
-        print("The course is full.")
-    elif not warning_text:
-        print("Course is Available")
-    else:
-        print(f"Unexpected status: {warning_text}")
-except Exception as e:
-    print("The course is available (warningMessage element not found).")
-    print(f"Error: {e}")
-
-driver.save_screenshot('screenshot.png')
+add_course(course_code)
+check_availability()
 
 time.sleep(600)
 
