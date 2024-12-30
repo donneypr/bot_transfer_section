@@ -16,14 +16,16 @@ myusername = os.getenv("USERNAME")
 mypassword = os.getenv("PASSWORD")
 mybypasscode = os.getenv("BYPASSCODE")
 
-# Class ID
-course_code = "E88F01"
+vsb = "https://schedulebuilder.yorku.ca/vsb/criteria.jsp?access=0&lang=en&tip=1&page=results&scratch=0&term=0&sort=none&filters=iiiiiiii&bbs=&ds=&cams=0_1_2_3_4_5_6&locs=any"
+rem = "https://wrem.sis.yorku.ca/Apps/WebObjects/REM.woa/wa/DirectAction/rem"
+
+course_code = "E88F01" #classid
 
 # Set up Chrome options
 chrome_options = Options()
 chrome_options.add_argument("--disable-popup-blocking") 
 chrome_options.add_argument("--disable-notifications")  
-chrome_options.add_argument("--headless")  # Run in headless mode (no browser window)
+chrome_options.add_argument("--headless")  
 chrome_options.add_argument("--disable-gpu")  
 
 current_directory = os.getcwd()
@@ -31,9 +33,10 @@ chromedriver_path = os.path.join(current_directory, "chromedriver")
 service = Service(executable_path=chromedriver_path)
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-driver.get("https://wrem.sis.yorku.ca/Apps/WebObjects/REM.woa/wa/DirectAction/rem")
+driver.get(vsb)
 
 time.sleep(2)
+
 username_input = driver.find_element(By.ID, "mli")
 username_input.clear()
 username_input.send_keys(myusername)
@@ -49,7 +52,7 @@ time.sleep(5)
 
 print("Logged in successfully. Waiting for user action.")
 
-wait = WebDriverWait(driver, 10)  # Adjust the timeout as needed
+wait = WebDriverWait(driver, 10)  
 verification_code_element = wait.until(
     EC.presence_of_element_located((By.CLASS_NAME, "verification-code"))
 )
@@ -74,8 +77,6 @@ try:
     print("Successfully clicked the bypass code link.")
 except Exception as e:
     print(f"An error occurred: {e}")
-
-
 
 
 wait = WebDriverWait(driver, 10)
@@ -104,15 +105,43 @@ try:
     print("Successfully clicked the 'Trust Browser' button.")
 except Exception as e:
     print(f"An error occurred while clicking the button: {e}")
-    
+
 time.sleep(10)
+
+term_radio_button = driver.find_element(By.ID, "term_2024102119")
+term_radio_button.click()
+
+time.sleep(2)
+
+course_input = driver.find_element(By.ID, "code_number")
+course_input.clear()  
+course_input.send_keys(course_code)
+
+wait = WebDriverWait(driver, 10)  
+add_course_button = wait.until(
+    EC.element_to_be_clickable((By.ID, "addCourseButton"))
+)
+
+add_course_button.click()
+print("Successfully clicked the 'Add Course' button.")
+
+time.sleep(3)
+
+try:
+    warning_message_element = driver.find_element(By.XPATH, '//*[@id="requirements"]/div[3]/div[2]/div[5]/div/span')
+    warning_text = warning_message_element.text.strip()
+    if "All classes are full" in warning_text:
+        print("The course is full.")
+    elif not warning_text:
+        print("Course is Available")
+    else:
+        print(f"Unexpected status: {warning_text}")
+except Exception as e:
+    print("The course is available (warningMessage element not found).")
+    print(f"Error: {e}")
 
 driver.save_screenshot('screenshot.png')
 
-
-
-
 time.sleep(600)
 
-# Quit the driver after completion
 driver.quit()
