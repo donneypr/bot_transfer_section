@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
+from datetime import datetime
+
 
 
 # Load environment variables
@@ -18,7 +20,8 @@ myusername = os.getenv("USERNAME")
 mypassword = os.getenv("PASSWORD")
 mybypasscode = os.getenv("BYPASSCODE")
 
-course_code = "E88F01" #classid
+#course_code = "E88F01" #classid
+course_code = "V35N01"
 vsb = "https://schedulebuilder.yorku.ca/vsb/criteria.jsp?access=0&lang=en&tip=1&page=results&scratch=0&term=0&sort=none&filters=iiiiiiii&bbs=&ds=&cams=0_1_2_3_4_5_6&locs=any"
 rem = "https://wrem.sis.yorku.ca/Apps/WebObjects/REM.woa/wa/DirectAction/rem"
 
@@ -41,7 +44,10 @@ def login_and_bypass_verification(driver, website_url, myusername, mypassword, m
         # Navigate to the website
         driver.get(website_url)
         # Enter username
-        username_input = driver.find_element(By.ID, "mli")
+        wait = WebDriverWait(driver, 10)
+        username_input = wait.until(
+            EC.presence_of_element_located((By.ID, "mli"))
+        )
         username_input.clear()
         username_input.send_keys(myusername)
 
@@ -117,7 +123,7 @@ def login_and_bypass_verification(driver, website_url, myusername, mypassword, m
         print(f"An error occurred during the login and verification process: {e}")
 
 
-def add_course(course_code):
+def vsb_add_course(course_code):
 
     time.sleep(5)
 
@@ -140,8 +146,7 @@ def add_course(course_code):
 
     time.sleep(3)
 
-def check_availability():
-
+def check_availability_with_refresh():
     try:
         warning_message_element = driver.find_element(By.XPATH, '//*[@id="requirements"]/div[3]/div[2]/div[5]/div/span')
         warning_text = warning_message_element.text.strip()
@@ -172,26 +177,18 @@ def transfer_section(course_code):
     transfer_course_button = driver.find_element(By.NAME, "5.1.27.1.27")
     transfer_course_button.click()
 
-    input_element = driver.find_element(By.NAME, "5.1.27.7.7")  # Replace with the exact name attribute
-    input_element.clear()  # Optional: Clears any pre-existing text
+    input_element = driver.find_element(By.NAME, "5.1.27.7.7")  
+    input_element.clear()  
     input_element.send_keys(course_code)
+
+
+login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
+vsb_add_course(course_code)
+
+if (check_availability_with_refresh()):
+    login_and_bypass_verification(driver,rem,myusername,mypassword,mybypasscode)
+    transfer_section(course_code)
     driver.save_screenshot("screenshot.png")
-
-
-login_and_bypass_verification(driver, rem, myusername, mypassword, mybypasscode)
-transfer_section(course_code)
-
-#add_course(course_code)
-
-
-
-
-# if (check_availability()):
-#     print("course is available, attempting to enroll")
-#     login_and_bypass_verification(driver, rem, myusername, mypassword, mybypasscode) #log into rem
-#     #logic to click on the right session
-#     #logic to click on transfer section and click join
-
 
 
 time.sleep(600)
