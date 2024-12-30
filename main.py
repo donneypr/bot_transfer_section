@@ -14,6 +14,7 @@ from selenium.webdriver.chrome.options import Options
 load_dotenv()
 myusername = os.getenv("USERNAME")
 mypassword = os.getenv("PASSWORD")
+mybypasscode = os.getenv("BYPASSCODE")
 
 # Class ID
 course_code = "E88F01"
@@ -54,6 +55,62 @@ verification_code_element = wait.until(
 )
 
 print("Verification code content:", verification_code_element.text)
+
+time.sleep(5)
+
+wait = WebDriverWait(driver, 10)
+other_options_button = wait.until(
+    EC.element_to_be_clickable((By.CLASS_NAME, "other-options-link"))
+)
+other_options_button.click()
+
+time.sleep(1)
+
+try:
+    bypass_code_link = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="test-id-bypass"]'))
+    )
+    bypass_code_link.click()
+    print("Successfully clicked the bypass code link.")
+except Exception as e:
+    print(f"An error occurred: {e}")
+
+
+
+
+wait = WebDriverWait(driver, 10)
+bypass_code_input = wait.until(
+    EC.visibility_of_element_located((By.ID, "passcode-input"))
+)
+
+# Enter the bypass code
+bypass_code_input.send_keys(mybypasscode)
+print("bypass code inputted")
+
+try:
+    verify_button = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="verify-button"]'))
+    )
+    verify_button.click()
+    print("Successfully clicked the verify button.")
+except Exception as e:
+    print(f"An error occurred while clicking the verify button: {e}")
+
+try:
+    trust_browser_button = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.ID, "trust-browser-button"))
+    )
+    trust_browser_button.click()
+    print("Successfully clicked the 'Trust Browser' button.")
+except Exception as e:
+    print(f"An error occurred while clicking the button: {e}")
+    
+time.sleep(10)
+
+driver.save_screenshot('screenshot.png')
+
+
+
 
 time.sleep(600)
 
