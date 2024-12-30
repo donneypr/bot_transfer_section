@@ -9,6 +9,8 @@ import time
 from dotenv import load_dotenv
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import Select
+
 
 # Load environment variables
 load_dotenv()
@@ -144,9 +146,11 @@ def check_availability():
         warning_message_element = driver.find_element(By.XPATH, '//*[@id="requirements"]/div[3]/div[2]/div[5]/div/span')
         warning_text = warning_message_element.text.strip()
         if "All classes are full" in warning_text:
+            return(False)
             print("The course is full.")
         elif not warning_text:
             print("Course is Available")
+            return(True)
         else:
             print(f"Unexpected status: {warning_text}")
     except Exception as e:
@@ -154,9 +158,41 @@ def check_availability():
         print(f"Error: {e}")
 
 
-login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
-add_course(course_code)
-check_availability()
+def transfer_section(course_code):
+    from selenium.webdriver.support.ui import Select
+    dropdown = driver.find_element(By.NAME, "5.5.1.27.1.11.0")
+    select = Select(dropdown)
+    select.select_by_value("1") # fall/winter 2024-2025 option
+
+    rembutton = driver.find_element(By.NAME, "5.5.1.27.1.13")  
+    rembutton.click()
+
+    time.sleep(1)
+
+    transfer_course_button = driver.find_element(By.NAME, "5.1.27.1.27")
+    transfer_course_button.click()
+
+    input_element = driver.find_element(By.NAME, "5.1.27.7.7")  # Replace with the exact name attribute
+    input_element.clear()  # Optional: Clears any pre-existing text
+    input_element.send_keys(course_code)
+    driver.save_screenshot("screenshot.png")
+
+
+login_and_bypass_verification(driver, rem, myusername, mypassword, mybypasscode)
+transfer_section(course_code)
+
+#add_course(course_code)
+
+
+
+
+# if (check_availability()):
+#     print("course is available, attempting to enroll")
+#     login_and_bypass_verification(driver, rem, myusername, mypassword, mybypasscode) #log into rem
+#     #logic to click on the right session
+#     #logic to click on transfer section and click join
+
+
 
 time.sleep(600)
 
