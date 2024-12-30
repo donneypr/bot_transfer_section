@@ -16,10 +16,9 @@ myusername = os.getenv("USERNAME")
 mypassword = os.getenv("PASSWORD")
 mybypasscode = os.getenv("BYPASSCODE")
 
+course_code = "E88F01" #classid
 vsb = "https://schedulebuilder.yorku.ca/vsb/criteria.jsp?access=0&lang=en&tip=1&page=results&scratch=0&term=0&sort=none&filters=iiiiiiii&bbs=&ds=&cams=0_1_2_3_4_5_6&locs=any"
 rem = "https://wrem.sis.yorku.ca/Apps/WebObjects/REM.woa/wa/DirectAction/rem"
-
-course_code = "E88F01" #classid
 
 # Set up Chrome options
 chrome_options = Options()
@@ -36,6 +35,8 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 driver.get(vsb)
 
 time.sleep(2)
+
+#need to modualarize by making this it's own function
 
 username_input = driver.find_element(By.ID, "mli")
 username_input.clear()
