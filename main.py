@@ -20,8 +20,8 @@ myusername = os.getenv("USERNAME")
 mypassword = os.getenv("PASSWORD")
 mybypasscode = os.getenv("BYPASSCODE")
 
-#course_code = "E88F01" #classid
-course_code = "V35N01"
+course_code = "E88F01" #classid
+#course_code = "V35N01"
 vsb = "https://schedulebuilder.yorku.ca/vsb/criteria.jsp?access=0&lang=en&tip=1&page=results&scratch=0&term=0&sort=none&filters=iiiiiiii&bbs=&ds=&cams=0_1_2_3_4_5_6&locs=any"
 rem = "https://wrem.sis.yorku.ca/Apps/WebObjects/REM.woa/wa/DirectAction/rem"
 
@@ -37,7 +37,9 @@ chromedriver_path = os.path.join(current_directory, "chromedriver")
 service = Service(executable_path=chromedriver_path)
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-#need to modualarize by making this it's own function
+
+def open_broswer(driver, website):
+    driver.get(website)
 
 def login_and_bypass_verification(driver, website_url, myusername, mypassword, mybypasscode):
     try:
@@ -181,7 +183,12 @@ def transfer_section(course_code):
     input_element.clear()  
     input_element.send_keys(course_code)
 
+def rem_add_course(course_code):
+    add_rem_course = driver.find_element(By.NAME, "5.1.27.7.9")
+    add_rem_course.click()
 
+
+                
 login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
 vsb_add_course(course_code)
 
@@ -189,6 +196,7 @@ vsb_add_course(course_code)
 if (check_availability_with_refresh()):
     login_and_bypass_verification(driver,rem,myusername,mypassword,mybypasscode)
     transfer_section(course_code)
+    
     driver.save_screenshot("screenshot.png")
 
 
