@@ -12,8 +12,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from datetime import datetime
 
-
-
 # Load environment variables
 load_dotenv()
 myusername = os.getenv("USERNAME")
@@ -183,7 +181,7 @@ def transfer_section(course_code):
     input_element.clear()  
     input_element.send_keys(course_code)
 
-def rem_add_course(course_code):
+def rem_submit():
     add_rem_course = driver.find_element(By.NAME, "5.1.27.7.9")
     add_rem_course.click()
 
@@ -196,6 +194,7 @@ vsb_add_course(course_code)
 if (check_availability_with_refresh()):
     login_and_bypass_verification(driver,rem,myusername,mypassword,mybypasscode)
     transfer_section(course_code)
+    rem_submit()
     
     driver.save_screenshot("screenshot.png")
 
