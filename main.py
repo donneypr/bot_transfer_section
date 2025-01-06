@@ -198,6 +198,7 @@ if (check_availability_with_refresh()):
     
     driver.save_screenshot("screenshot.png")
 
+#need to implement recurrent checking
 
 time.sleep(600)
 
