@@ -20,8 +20,7 @@ myusername = os.getenv("USERNAME")
 mypassword = os.getenv("PASSWORD")
 mybypasscode = os.getenv("BYPASSCODE")
 
-course_code = "E88F01" #classid
-#course_code = "V35N01"
+course_code = "W04U02" 
 vsb = "https://schedulebuilder.yorku.ca/vsb/criteria.jsp?access=0&lang=en&tip=1&page=results&scratch=0&term=0&sort=none&filters=iiiiiiii&bbs=&ds=&cams=0_1_2_3_4_5_6&locs=any"
 rem = "https://wrem.sis.yorku.ca/Apps/WebObjects/REM.woa/wa/DirectAction/rem"
 
@@ -149,20 +148,28 @@ def vsb_add_course(course_code):
     time.sleep(3)
 
 def check_availability_with_refresh():
-    try:
-        warning_message_element = driver.find_element(By.XPATH, '//*[@id="requirements"]/div[3]/div[2]/div[5]/div/span')
-        warning_text = warning_message_element.text.strip()
-        if "All classes are full" in warning_text:
-            return(False)
-            print("The course is full.")
-        elif not warning_text:
-            print("Course is Available")
-            return(True)
-        else:
-            print(f"Unexpected status: {warning_text}")
-    except Exception as e:
-        print("The course is available (warningMessage element not found).")
-        print(f"Error: {e}")
+    while True:  # Keep checking until the course is available
+        try:
+            # Locate the warning message element
+            warning_message_element = driver.find_element(By.XPATH, '//*[@id="requirements"]/div[3]/div[2]/div[5]/div/span')
+            warning_text = warning_message_element.text.strip()
+
+            if "All classes are full" in warning_text:
+                print("The course is full. Refreshing the page in 30 seconds...")
+                time.sleep(30)  # Wait before refreshing
+                driver.refresh()  # Refresh the page
+            elif not warning_text:
+                print("Course is Available")
+                return True  # Exit the loop and return True when available
+            else:
+                print(f"Unexpected status: {warning_text}")
+                time.sleep(30)  # Wait before refreshing
+                driver.refresh()  # Refresh the page
+        except Exception as e:
+            print("The course is available (warningMessage element not found).")
+            print(f"Error: {e}")
+            return True  # Assuming the course is available if no warning element is found
+
 
 
 def transfer_section(course_code):
@@ -188,18 +195,25 @@ def rem_submit():
 
 def enroll_into_course(course_code):
 
+    dropdown = driver.find_element(By.NAME, "5.5.1.27.1.11.0")
+    select = Select(dropdown)
+    select.select_by_value("1") # fall/winter 2024-2025 option
+
     continuebutton = driver.find_element(By.NAME, "5.5.1.27.1.13")  
     continuebutton.click()
+
+    time.sleep(1)
     
     addcourse = driver.find_element(By.NAME, "5.1.27.1.23")  
     addcourse.click()
+
     time.sleep(1)
     input_element = driver.find_element(By.NAME, "5.1.27.7.7")  
     input_element.clear()  
     input_element.send_keys(course_code)
 
     rem_submit()
-    
+
     time.sleep(1)
     finalyes = driver.find_element(By.NAME, "5.1.27.11.11")
     finalyes.click()
@@ -207,11 +221,10 @@ def enroll_into_course(course_code):
 login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
 vsb_add_course(course_code)
 
-#error might be because it's cacheing the old token in the broswer and tries to interact with the elements like it's trying to login for the first time
+#error might be because it's caching the old token in the broswer and tries to interact with the elements like it's trying to login for the first time
 if (check_availability_with_refresh()):
     login_and_bypass_verification(driver,rem,myusername,mypassword,mybypasscode)
     enroll_into_course(course_code)
-    
     driver.save_screenshot("screenshot.png")
 
 #need to implement recurrent checking
