@@ -31,6 +31,7 @@ chrome_options.add_argument("--disable-notifications")
 chrome_options.add_argument("--headless")  
 chrome_options.add_argument("--disable-gpu")  
 
+
 current_directory = os.getcwd()
 chromedriver_path = os.path.join(current_directory, "chromedriver")
 service = Service(executable_path=chromedriver_path)
@@ -147,7 +148,7 @@ def vsb_add_course(course_code):
 
     time.sleep(3)
 
-def check_availability_with_refresh():
+def check_availability_with_refresh(course_code):
     while True:  # Keep checking until the course is available
         try:
             # Locate the warning message element
@@ -158,6 +159,7 @@ def check_availability_with_refresh():
                 print("The course is full. Refreshing the page in 30 seconds...")
                 time.sleep(30)  # Wait before refreshing
                 driver.refresh()  # Refresh the page
+                vsb_add_course(course_code)  # Attempt to add the course again after refresh
             elif not warning_text:
                 print("Course is Available")
                 return True  # Exit the loop and return True when available
@@ -165,12 +167,11 @@ def check_availability_with_refresh():
                 print(f"Unexpected status: {warning_text}")
                 time.sleep(30)  # Wait before refreshing
                 driver.refresh()  # Refresh the page
+                vsb_add_course(course_code)  # Attempt to add the course again after refresh
         except Exception as e:
             print("The course is available (warningMessage element not found).")
             print(f"Error: {e}")
             return True  # Assuming the course is available if no warning element is found
-
-
 
 def transfer_section(course_code):
     dropdown = driver.find_element(By.NAME, "5.5.1.27.1.11.0")
@@ -222,7 +223,7 @@ login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
 vsb_add_course(course_code)
 
 #error might be because it's caching the old token in the broswer and tries to interact with the elements like it's trying to login for the first time
-if (check_availability_with_refresh()):
+if (check_availability_with_refresh(course_code)):
     login_and_bypass_verification(driver,rem,myusername,mypassword,mybypasscode)
     enroll_into_course(course_code)
     driver.save_screenshot("screenshot.png")
