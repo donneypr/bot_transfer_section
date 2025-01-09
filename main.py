@@ -11,6 +11,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from datetime import datetime
+from selenium.webdriver.support.ui import Select
+
 
 # Load environment variables
 load_dotenv()
@@ -164,7 +166,6 @@ def check_availability_with_refresh():
 
 
 def transfer_section(course_code):
-    from selenium.webdriver.support.ui import Select
     dropdown = driver.find_element(By.NAME, "5.5.1.27.1.11.0")
     select = Select(dropdown)
     select.select_by_value("1") # fall/winter 2024-2025 option
@@ -185,7 +186,23 @@ def rem_submit():
     add_rem_course = driver.find_element(By.NAME, "5.1.27.7.9")
     add_rem_course.click()
 
+def enroll_into_course(course_code):
 
+    continuebutton = driver.find_element(By.NAME, "5.5.1.27.1.13")  
+    continuebutton.click()
+    
+    addcourse = driver.find_element(By.NAME, "5.1.27.1.23")  
+    addcourse.click()
+    time.sleep(1)
+    input_element = driver.find_element(By.NAME, "5.1.27.7.7")  
+    input_element.clear()  
+    input_element.send_keys(course_code)
+
+    rem_submit()
+    
+    time.sleep(1)
+    finalyes = driver.find_element(By.NAME, "5.1.27.11.11")
+    finalyes.click()
                 
 login_and_bypass_verification(driver, vsb, myusername, mypassword, mybypasscode)
 vsb_add_course(course_code)
@@ -193,8 +210,7 @@ vsb_add_course(course_code)
 #error might be because it's cacheing the old token in the broswer and tries to interact with the elements like it's trying to login for the first time
 if (check_availability_with_refresh()):
     login_and_bypass_verification(driver,rem,myusername,mypassword,mybypasscode)
-    transfer_section(course_code)
-    rem_submit()
+    enroll_into_course(course_code)
     
     driver.save_screenshot("screenshot.png")
 
